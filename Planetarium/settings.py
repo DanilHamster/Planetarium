@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     "planitarium_service",
-    "user"
+    "user",
+    "rest_framework",
 ]
 
 MIDDLEWARE = [

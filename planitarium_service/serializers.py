@@ -10,7 +10,7 @@ class ShowThemeSerializer(serializers.ModelSerializer):
         model = ShowTheme
         fields = ("id", "name", )
 
-class AstronomyShowSerializer(serializers.ModelSerializer):
+class AstronomyShowListSerializer(serializers.ModelSerializer):
 
     themes = serializers.SlugRelatedField(
         many=True,
@@ -20,9 +20,9 @@ class AstronomyShowSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AstronomyShow
-        fields = ("title", "themes")
+        fields = ("title", "themes",)
 
-class AstronomyShowRetrieveSerializer(AstronomyShowSerializer):
+class AstronomyShowSerializer(AstronomyShowListSerializer):
 
     class Meta:
         model = AstronomyShow
@@ -33,7 +33,7 @@ class PlanetariumDomeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PlanetariumDome
-        fields = ("id", "name", "rows", "seat_in_row")
+        fields = ("id", "name", "rows", "seat_in_row", "total_seats", "size")
 
 class ShowSessionSerializer(serializers.ModelSerializer):
 
@@ -45,10 +45,11 @@ class ShowSessionSerializer(serializers.ModelSerializer):
 class ShowSessionListSerializer(serializers.ModelSerializer):
     astronomy_show = serializers.CharField(source="astronomy_show.title", read_only=True)
     planetarium_dome = serializers.CharField(source="planetarium_dome.name", read_only=True)
+    tickets_available = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = ShowSession
-        fields = ("id", "astronomy_show", "planetarium_dome", "show_time",)
+        fields = ("id", "astronomy_show", "planetarium_dome", "show_time", "tickets_available")
 
 
 class ShowSessionRetrieveSerializer(ShowSessionSerializer):
@@ -57,6 +58,9 @@ class ShowSessionRetrieveSerializer(ShowSessionSerializer):
 
 
 class TicketSerializer(serializers.ModelSerializer):
+
+    show_session = serializers.CharField(source="show_session.astronomy_show.title", read_only=True)
+
     class Meta:
         model = Ticket
         fields = ("id", "row", "seat", "show_session")
@@ -75,8 +79,12 @@ class TicketSerializer(serializers.ModelSerializer):
         return attrs
 
 
+class TicketRetrieveSerializer(TicketSerializer):
+    show_session = ShowSessionRetrieveSerializer()
+
+
 class ReservationSerializer(serializers.ModelSerializer):
-    tickets = TicketSerializer(many=True, read_only=False, allow_empty=False)
+    tickets = TicketSerializer(many=True, read_only=False)
 
     class Meta:
         model = Reservation
@@ -89,3 +97,11 @@ class ReservationSerializer(serializers.ModelSerializer):
             for ticket_data in tickets_data:
                 Ticket.objects.create(reservation=reservation, **ticket_data)
             return reservation
+
+class ReservationRetrieveSerializer(serializers.ModelSerializer):
+    tickets = TicketRetrieveSerializer(many=True, read_only=False)
+
+    class Meta:
+        model = Reservation
+        fields = ("id", "created_at", "tickets")
+

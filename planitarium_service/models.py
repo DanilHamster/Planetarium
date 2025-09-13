@@ -24,6 +24,19 @@ class PlanetariumDome(models.Model):
     rows = models.IntegerField()
     seat_in_row = models.IntegerField()
 
+    @property
+    def total_seats(self):
+        return self.rows * self.seat_in_row
+
+    @property
+    def size(self):
+        if self.total_seats <= 72:
+            return "Small"
+        if 75 <= self.total_seats <= 160:
+            return "Middle"
+        if self.total_seats >= 160:
+            return "Big"
+
     def __str__(self):
         return self.name
 

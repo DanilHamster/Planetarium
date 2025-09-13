@@ -6,7 +6,7 @@ from rest_framework.decorators import action
 from planitarium_service.models import AstronomyShow, ShowTheme, PlanetariumDome, ShowSession, Reservation
 from planitarium_service.serializers import AstronomyShowSerializer, ShowThemeSerializer, \
     AstronomyShowRetrieveSerializer, PlanetariumDomeSerializer, ShowSessionSerializer, ShowSessionRetrieveSerializer, \
-    ReservationSerializer
+    ReservationSerializer, ShowSessionListSerializer
 
 
 class AstronomyShowView(viewsets.ModelViewSet):
@@ -32,6 +32,8 @@ class ShowSessionSerializerView(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == "retrieve":
             return ShowSessionRetrieveSerializer
+        if self.action == "list":
+            return ShowSessionListSerializer
         return ShowSessionSerializer
 
 

@@ -6,11 +6,6 @@ from planitarium_service.models import AstronomyShow, ShowTheme, PlanetariumDome
 
 class ShowThemeSerializer(serializers.ModelSerializer):
 
-    # shows = serializers.SlugRelatedField(
-    #     many=True,
-    #     queryset = AstronomyShow.objects.all(),
-    #     slug_field="title"
-    # )
     class Meta:
         model = ShowTheme
         fields = ("id", "name", )
@@ -44,7 +39,16 @@ class ShowSessionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ShowSession
-        fields = ("id", "astronomy_show", "planetarium_dome", "show_time")
+        fields = ("id", "astronomy_show", "planetarium_dome", "show_time",)
+
+
+class ShowSessionListSerializer(serializers.ModelSerializer):
+    astronomy_show = serializers.CharField(source="astronomy_show.title", read_only=True)
+    planetarium_dome = serializers.CharField(source="planetarium_dome.name", read_only=True)
+
+    class Meta:
+        model = ShowSession
+        fields = ("id", "astronomy_show", "planetarium_dome", "show_time",)
 
 
 class ShowSessionRetrieveSerializer(ShowSessionSerializer):
@@ -53,10 +57,9 @@ class ShowSessionRetrieveSerializer(ShowSessionSerializer):
 
 
 class TicketSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Ticket
-        fields = ("id", "row", "seat", "show_session",)
+        fields = ("id", "row", "seat", "show_session")
 
     def validate(self, attrs):
         Ticket.validate_seat(
@@ -64,24 +67,24 @@ class TicketSerializer(serializers.ModelSerializer):
             attrs["show_session"].planetarium_dome.seat_in_row,
             serializers.ValidationError
         )
-        Ticket.validate_seat(
+        Ticket.validate_row(
             attrs["row"],
             attrs["show_session"].planetarium_dome.rows,
             serializers.ValidationError
         )
         return attrs
 
-class ReservationSerializer(serializers.ModelSerializer):
 
-    tickets = TicketSerializer()
+class ReservationSerializer(serializers.ModelSerializer):
+    tickets = TicketSerializer(many=True, read_only=False, allow_empty=False)
 
     class Meta:
         model = Reservation
-        fields = ("id", "created_at", "tickets",)
+        fields = ("id", "created_at", "tickets")
 
     def create(self, validated_data):
-        with transaction.atomic:
-            tickets_data = validated_data.pop('tickets')
+        tickets_data = validated_data.pop("tickets")
+        with transaction.atomic():
             reservation = Reservation.objects.create(**validated_data)
             for ticket_data in tickets_data:
                 Ticket.objects.create(reservation=reservation, **ticket_data)

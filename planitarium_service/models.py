@@ -32,6 +32,8 @@ class ShowSession(models.Model):
     planetarium_dome = models.ForeignKey(PlanetariumDome, on_delete=models.CASCADE, related_name="dome_sessions")
     show_time = models.DateTimeField()
 
+    def __str__(self):
+        return self.astronomy_show.title
 
 class Reservation(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)

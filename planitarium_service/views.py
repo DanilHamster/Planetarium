@@ -7,7 +7,7 @@ from planitarium_service.models import AstronomyShow, ShowTheme, PlanetariumDome
 from planitarium_service.serializers import ShowThemeSerializer, \
     PlanetariumDomeSerializer, ShowSessionSerializer, ShowSessionRetrieveSerializer, \
     ReservationSerializer, ShowSessionListSerializer, AstronomyShowListSerializer, AstronomyShowSerializer, \
-    TicketRetrieveSerializer, ReservationRetrieveSerializer
+    ReservationRetrieveSerializer, ReservationListSerializer
 
 
 class AstronomyShowView(viewsets.ModelViewSet):
@@ -66,13 +66,16 @@ class ReservationView(mixins.ListModelMixin,
     permission_classes = (IsAuthenticated,)
 
     def get_serializer_class(self):
+        if self.action == "list":
+            return ReservationListSerializer
         if self.action == "retrieve":
             return ReservationRetrieveSerializer
+
         return ReservationSerializer
 
 
     def get_queryset(self):
-        return self.queryset.select_related("user").prefetch_related("tickets__show_session__planetarium_dome")
+        return self.queryset.select_related("user").prefetch_related("tickets__show_session__planetarium_dome").filter(user=self.request.user)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)

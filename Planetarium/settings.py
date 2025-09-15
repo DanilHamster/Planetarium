@@ -9,8 +9,13 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
+import os
 from datetime import timedelta
 from pathlib import Path
+from dotenv import load_dotenv
+
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -40,6 +45,7 @@ INSTALLED_APPS = [
     "planitarium_service",
     "user",
     "rest_framework",
+    'storages'
 ]
 
 MIDDLEWARE = [
@@ -167,4 +173,20 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "ROTATE_REFRESH_TOKENS": False,
 
+}
+
+STORAGES = {
+    "default": {
+        "BACKEND": "base.storages.WindowsCompatibleDropboxStorage",
+        "OPTIONS": {
+            "oauth2_access_token": os.getenv("DROPBOX_OAUTH2_ACCESS_TOKEN"),
+            "oauth2_refresh_token": os.getenv("DROPBOX_OAUTH2_REFRESH_TOKEN"),
+            "app_secret": os.getenv("DROPBOX_APP_SECRET"),
+            "app_key": os.getenv("DROPBOX_APP_KEY"),
+            "root_path": os.getenv("DROPBOX_ROOT_PATH"),
+        },
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
 }

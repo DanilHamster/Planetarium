@@ -1,14 +1,22 @@
 from django.db import models
-
+from django.conf import settings
 from user.models import User
 
 
 class AstronomyShow(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
+    image = models.ImageField(
+        null=True, blank=True, upload_to="astronomy/photo/"
+    )
 
     def __str__(self):
         return self.title
+
+    def get_image_url(self):
+        if self.image:
+            return self.image.url
+        return f"{settings.STATIC_URL}img/placeholder.png"
 
 
 class ShowTheme(models.Model):

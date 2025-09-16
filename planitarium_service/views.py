@@ -1,6 +1,6 @@
 from django.db.models import Count, F
-from rest_framework import generics, mixins, viewsets, filters, status
-from rest_framework.decorators import action, permission_classes
+from drf_spectacular.utils import extend_schema, OpenApiParameter, extend_schema_view
+from rest_framework import mixins, viewsets, filters
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 
 from planitarium_service.models import AstronomyShow, ShowTheme, PlanetariumDome, ShowSession, Reservation
@@ -10,6 +10,22 @@ from planitarium_service.serializers import ShowThemeSerializer, \
     ReservationRetrieveSerializer, ReservationListSerializer
 
 
+def search_schema(description: str):
+    return extend_schema_view(
+        list=extend_schema(
+            parameters=[
+                OpenApiParameter(
+                    name='search',
+                    description=description,
+                    required=False,
+                    type=str
+                )
+            ]
+        )
+    )
+
+
+@search_schema("Search by title")
 class AstronomyShowView(viewsets.ModelViewSet):
     queryset = AstronomyShow.objects.prefetch_related("themes",)
     filter_backends = [filters.SearchFilter]
@@ -21,7 +37,7 @@ class AstronomyShowView(viewsets.ModelViewSet):
         return AstronomyShowSerializer
 
 
-
+@search_schema("Search by name")
 class ShowThemeView(viewsets.ModelViewSet):
     permission_classes = (IsAdminUser,)
     queryset = ShowTheme.objects.all()
@@ -33,6 +49,8 @@ class PlanetariumDomeView(viewsets.ModelViewSet):
     queryset = PlanetariumDome.objects.all()
     serializer_class = PlanetariumDomeSerializer
 
+
+@search_schema("Search by astronomy show title")
 class ShowSessionSerializerView(viewsets.ModelViewSet):
     queryset = ShowSession.objects.all()
     filter_backends = [filters.SearchFilter]

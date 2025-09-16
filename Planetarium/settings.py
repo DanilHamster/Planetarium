@@ -45,7 +45,9 @@ INSTALLED_APPS = [
     "planitarium_service",
     "user",
     "rest_framework",
-    'storages'
+    'storages',
+    'drf_spectacular',
+
 ]
 
 MIDDLEWARE = [
@@ -156,8 +158,8 @@ REST_FRAMEWORK = {
 }
 
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'station API',
-    'DESCRIPTION': 'Bus Station order ticket',
+    'TITLE': 'Planetarium API',
+    'DESCRIPTION': 'Planetarium order ticket',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
     "SWAGGER_UI_SETTINGS": {

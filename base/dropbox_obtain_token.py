@@ -12,10 +12,7 @@ auth_code = input("Enter the authorization code here: ").strip()
 
 response = requests.post(
     "https://api.dropboxapi.com/oauth2/token",
-    data={
-        "code": auth_code,
-        "grant_type": "authorization_code",
-    },
+    data={"code": auth_code, "grant_type": "authorization_code"},
     headers={"Content-Type": "application/x-www-form-urlencoded"},
     auth=HTTPBasicAuth(APP_KEY, APP_SECRET),
 )

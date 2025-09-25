@@ -118,9 +118,14 @@ class ReservationView(
     def get_queryset(self):
         return (
             self.queryset.select_related("user")
-            .prefetch_related("tickets__show_session__planetarium_dome", "tickets__show_session__astronomy_show")
+            .prefetch_related(
+                "tickets__show_session__planetarium_dome",
+                "tickets__show_session__astronomy_show",
+            )
             .filter(user=self.request.user)
         )
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+        help_text = ("Search by active borrowings",)

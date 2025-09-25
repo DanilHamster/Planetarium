@@ -10,20 +10,18 @@ class AstronomyShow(models.Model):
         null=True, blank=True, upload_to="astronomy/photo/"
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.title
 
-    def get_image_url(self):
-        if self.image:
-            return self.image.url
-        return f"{settings.STATIC_URL}img/placeholder.png"
+    def get_image_url(self) -> str:
+        return self.image.url
 
 
 class ShowTheme(models.Model):
     name = models.CharField(max_length=255)
     shows = models.ManyToManyField(AstronomyShow, related_name="themes")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
@@ -33,19 +31,20 @@ class PlanetariumDome(models.Model):
     seat_in_row = models.IntegerField()
 
     @property
-    def total_seats(self):
+    def total_seats(self) -> int:
         return self.rows * self.seat_in_row
 
     @property
-    def size(self):
+    def size(self) -> str:
         if self.total_seats <= 72:
-            return "Small"
-        if 75 <= self.total_seats <= 160:
-            return "Middle"
-        if self.total_seats >= 160:
-            return "Big"
+            result = "Small"
+        elif self.total_seats <= 160:
+            result = "Middle"
+        else:
+            result = "Big"
+        return result
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
@@ -58,7 +57,7 @@ class ShowSession(models.Model):
     )
     show_time = models.DateTimeField()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.astronomy_show.title
 
 
@@ -89,7 +88,7 @@ class Ticket(models.Model):
         ordering = ("seat",)
 
     @staticmethod
-    def validate_seat(seat: int, seat_in_row: int, error_to_raise):
+    def validate_seat(seat: int, seat_in_row: int, error_to_raise) -> None:
         if not (1 <= seat <= seat_in_row):
             raise error_to_raise(
                 {
@@ -98,13 +97,13 @@ class Ticket(models.Model):
             )
 
     @staticmethod
-    def validate_row(row: int, rows: int, error_to_raise):
+    def validate_row(row: int, rows: int, error_to_raise) -> None:
         if not (1 <= row <= rows):
             raise error_to_raise(
                 {"seat": f"seat must be in range [1, {rows}], not {row}"}
             )
 
-    def clean(self):
+    def clean(self) -> None:
         Ticket.validate_seat(
             self.seat,
             self.show_session.planetarium_dome.seat_in_row,
@@ -120,7 +119,7 @@ class Ticket(models.Model):
         force_update=False,
         using=None,
         update_fields=None,
-    ):
+    ) -> None:
         self.full_clean()
         return super(Ticket, self).save(
             force_insert=force_insert,

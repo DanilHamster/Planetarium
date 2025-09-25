@@ -20,4 +20,4 @@ router.register("show_session", ShowSessionView)
 router.register("reservation", ReservationView)
 
 
-urlpatterns = [path("", include(router.urls))]
+urlpatterns = router.urls
